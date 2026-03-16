@@ -83,8 +83,8 @@ services:
     container_name: sn-elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false # Отключаем безопасность для простоты в Dev
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Ограничиваем память, иначе "съест" всё
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
     volumes:
