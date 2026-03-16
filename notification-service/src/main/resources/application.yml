@@ -1,0 +1,22 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: notification-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ${spring.application.name}-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.github.nikita65288.*"
+        spring.json.value.default.type: "com.github.nikita65288.dto.event.MessageSentEvent"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

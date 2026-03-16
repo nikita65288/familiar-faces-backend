@@ -1,0 +1,20 @@
+server:
+  port: 9004
+
+spring:
+  application:
+    name: media-service
+  data:
+    mongodb:
+      # Template: mongodb://login:password@host:port/db_name?authSource=admin
+      uri: mongodb://user:password@localhost:27018/media_db?authSource=admin
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB

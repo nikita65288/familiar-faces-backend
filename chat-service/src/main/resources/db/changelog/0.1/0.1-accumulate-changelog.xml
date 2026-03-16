@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-chat-types-table" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'create-chat-types-table'</sqlCheck>
+        </preConditions>
+        <comment>Creates 'chat_types' table.</comment>
+        <sqlFile path="create-chat-types-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-participant-roles-table" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'create-participant-roles-table'</sqlCheck>
+        </preConditions>
+        <comment>Creates 'participant_roles' table.</comment>
+        <sqlFile path="create-participant-roles-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="init-data" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'init-data'</sqlCheck>
+        </preConditions>
+        <comment>Adds initial data to 'participant_roles' and 'chat_types' tables.</comment>
+        <sqlFile path="data/init-data.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="create-initial-chat-tables" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'create-initial-chat-tables'</sqlCheck>
+        </preConditions>
+        <comment>Creates 'chats', 'chat_participants' and 'messages' tables.</comment>
+        <sqlFile path="create-initial-chat-tables.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="add_pk_to_messages_table" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'add_pk_to_messages_table'</sqlCheck>
+        </preConditions>
+        <comment>Adds primary key to 'messages' tables.</comment>
+        <sqlFile path="add_pk_to_messages_table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>
