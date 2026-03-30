@@ -5,35 +5,30 @@ spring:
   application:
     name: chat-service
 
-  datasource:
-    url: jdbc:postgresql://localhost:5433/chat_service_db
-    username: user
-    password: password
+  profiles:
+    active: local # default value
+
+  config:
+    # Note: use "SPRING_CLOUD_CONFIG_URI=..." on prod to override this 
+    import: "optional:configserver:http://localhost:8888/"
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
 
   liquibase:
     change-log: classpath:db/changelog/changelog-root.xml
-    url: jdbc:postgresql://localhost:5433/chat_service_db
-    user: user
-    password: password
     default-schema: public
 
   kafka:
-    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: true
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437 # 256 bit
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "env,configprops"

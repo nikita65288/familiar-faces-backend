@@ -2,15 +2,16 @@ package com.github.nikita65288;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.config.server.EnableConfigServer;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+@EnableConfigServer
 @EnableDiscoveryClient
-@EnableFeignClients
-public class AuthServiceApplication {
+@SpringBootApplication
+public class ConfigServiceApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(AuthServiceApplication.class, args);
-        System.out.println("Auth Service is running!");
+        SpringApplication.run(ConfigServiceApplication.class, args);
+        System.out.println("Config Service is running!");
     }
 }

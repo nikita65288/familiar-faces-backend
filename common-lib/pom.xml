@@ -60,6 +60,11 @@
             <artifactId>spring-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+
         <!--MapStruct dependency-->
         <dependency>
             <groupId>org.mapstruct</groupId>

@@ -33,7 +33,8 @@
     <module>api-gateway</module>
     <module>chat-service</module>
     <module>notification-service</module>
-      <module>media-service</module>
+    <module>media-service</module>
+    <module>config-service</module>
   </modules>
 
 

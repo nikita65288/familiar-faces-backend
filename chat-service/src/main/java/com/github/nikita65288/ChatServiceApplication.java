@@ -13,6 +13,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class ChatServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(ChatServiceApplication.class, args);
-        System.out.println("Chat Service!");
+        System.out.println("Chat Service is running!");
     }
 }

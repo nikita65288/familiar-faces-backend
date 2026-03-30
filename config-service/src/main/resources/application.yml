@@ -1,0 +1,18 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+
+  profiles:
+    active: local # default value
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/nikita65288/familiar-faces-config.git
+          default-label: main
+          username: nikita65288
+          password: ${GIT_TOKEN}

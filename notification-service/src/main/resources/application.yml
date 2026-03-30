@@ -5,8 +5,15 @@ spring:
   application:
     name: notification-service
 
+
+  profiles:
+    active: local # default value
+
+  config:
+    # Note: use "SPRING_CLOUD_CONFIG_URI=..." on prod to override this
+    import: "optional:configserver:http://localhost:8888/"
+
   kafka:
-    bootstrap-servers: localhost:9092
     consumer:
       group-id: ${spring.application.name}-group
       auto-offset-reset: earliest
@@ -15,8 +22,3 @@ spring:
       properties:
         spring.json.trusted.packages: "com.github.nikita65288.*"
         spring.json.value.default.type: "com.github.nikita65288.dto.event.MessageSentEvent"
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/

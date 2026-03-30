@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      # Template: mongodb://login:password@host:port/db_name?authSource=admin
+      uri: mongodb://user:password@localhost:27018/media_db?authSource=admin
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

@@ -1,0 +1,12 @@
+logging:
+  level:
+    root: INFO
+
+eureka:
+  instance:
+    # В кластере k3s сервис должен представляться своим внутренним DNS-именем
+    hostname: discovery-service
+  client:
+    service-url:
+      # Внутренний адрес внутри кластера
+      defaultZone: http://discovery-service:8761/eureka/

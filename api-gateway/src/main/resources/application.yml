@@ -4,6 +4,14 @@ server:
 spring:
   application:
     name: api-gateway
+
+  profiles:
+    active: local # default value
+
+  config:
+    # Note: use "SPRING_CLOUD_CONFIG_URI=..." on prod to override this
+    import: "optional:configserver:http://localhost:8888/"
+
   cloud:
     gateway:
       discovery:
@@ -35,19 +43,11 @@ spring:
           predicates:
             - Path=/ws/**
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437 # 256 bit
-
 management:
   endpoints:
     web:
       exposure:
-        include: "health,info,env,threshold" # Можно "*" для теста, но лучше перечислить
+        include: "health,info,env,threshold"
   tracing:
     sampling:
       probability: 1.0
