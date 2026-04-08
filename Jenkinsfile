@@ -5,7 +5,7 @@ pipeline {
         GHCR_USER = 'nikita65288'
         GHCR_CREDENTIALS_ID = 'github-ghcr-token'
 
-        SERVICES = 'discovery-service chat-service auth-service user-service media-service notification-service api-gateway'
+        SERVICES = 'config-service discovery-service chat-service auth-service user-service media-service notification-service api-gateway'
     }
 
     stages {
