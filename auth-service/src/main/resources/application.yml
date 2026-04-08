@@ -8,9 +8,9 @@ spring:
   profiles:
     active: local # default value
 
-    config:
-      # Note: use "SPRING_CLOUD_CONFIG_URI=..." on prod to override this
-      import: "optional:configserver:http://localhost:8888/"
+  config:
+    # Note: use "SPRING_CLOUD_CONFIG_URI=..." on prod to override this
+    import: "optional:configserver:http://localhost:8888/"
 
   jpa:
     hibernate:
