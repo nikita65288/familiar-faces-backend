@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY target/api-gateway.jar app.jar
 
 EXPOSE 8080
 
