@@ -19,8 +19,10 @@ import com.github.nikita65288.repository.MessageRepository;
 import com.github.nikita65288.validator.ChatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -90,14 +95,26 @@ public class ChatService {
 
         chatValidator.validateParticipant(chatId, userId);
 
-        messageRepository.markMessagesAsRead(chatId, userId);
+        markMessagesAsReadAndNotify(chatId, userId);
 
-        // TODO: send a notification to the author via WebSocket that his messages have been read
+        // TODO: refactoring needed?
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Message> messagePage = messageRepository.findByChatIdOrderByCreatedAtDesc(chatId, pageable);
+        Page<Message> messagePage = messageRepository.findByChatId(chatId, pageable);
 
-        return messagePage.map(messageMapper::messageToMessageDto);
+        List<MessageDto> content = new ArrayList<>(
+                messagePage.getContent().stream()
+                        .map(messageMapper::messageToMessageDto)
+                        .toList()
+        );
+
+        Collections.reverse(content);
+
+        return new PageImpl<>(content, pageable, messagePage.getTotalElements());
     }
 
     @Transactional
@@ -146,6 +163,8 @@ public class ChatService {
 
         chatValidator.validateParticipant(chatId, senderId);
 
+        markMessagesAsReadAndNotify(chatId, senderId);
+
         Message message = messageMapper.createMessageDtoToMessage(chatId, senderId, createMessageDto);
         message = messageRepository.save(message);
 
@@ -175,6 +194,29 @@ public class ChatService {
         kafkaTemplate.send(KafkaConstants.CHAT_MESSAGES_TOPIC, event);
 
         return messageDto;
+    }
+
+    @Transactional
+    public void markMessagesAsReadAndNotify(Long chatId, Long userId) {
+        // Get the IDs of messages that will be marked as read
+        List<Long> newlyReadMessageIds = messageRepository.findUnreadMessageIds(chatId, userId);
+
+        // Mark them as read
+        if (!newlyReadMessageIds.isEmpty()) {
+            messageRepository.markMessagesAsRead(chatId, userId);
+
+            System.out.println("Sending read notification to /topic/chats." + chatId + ".read with messageIds: " + newlyReadMessageIds);
+
+            // Notify via WebSocket
+            messagingTemplate.convertAndSend(
+                    "/topic/chats." + chatId + ".read",
+                    Map.of(
+                            "readerId", userId,
+                            "messageIds", newlyReadMessageIds,
+                            "chatId", chatId
+                    )
+            );
+        }
     }
 
     @Transactional

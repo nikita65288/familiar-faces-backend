@@ -37,6 +37,7 @@ public class ChatController {
     public ResponseEntity<List<ChatDto>> getMyChats(
             @RequestHeader(USER_ID_HEADER) Long userId
     ) {
+        System.out.println("User Id Header: " + userId);
         return ResponseEntity.ok(chatService.getUserChats(userId));
     }
 
@@ -66,6 +67,15 @@ public class ChatController {
             @Valid @RequestBody CreateMessageDto dto
     ) {
         return ResponseEntity.ok(chatService.saveMessage(chatId, userId, dto));
+    }
+
+    @PostMapping("/{chatId}/read")
+    public ResponseEntity<Void> markChatAsRead(
+            @PathVariable Long chatId,
+            @RequestHeader(USER_ID_HEADER) Long userId
+    ) {
+        chatService.markMessagesAsReadAndNotify(chatId, userId);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{chatId}/messages/{messageId}")
