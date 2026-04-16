@@ -30,5 +30,8 @@ public class Message extends BaseEntity {
 
     @Column(name = "is_read")
     private Boolean isRead;
+
+    @Column(name = "attachment_url")
+    private String attachmentUrl;
 }
 

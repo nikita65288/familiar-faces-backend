@@ -2,6 +2,7 @@ package com.github.nikita65288.validator;
 
 import com.github.nikita65288.client.UserClient;
 import com.github.nikita65288.dto.chat.CreateChatDto;
+import com.github.nikita65288.dto.message.CreateMessageDto;
 import com.github.nikita65288.entity.Message;
 import com.github.nikita65288.enums.ChatType;
 import com.github.nikita65288.exception.FFBadRequestException;
@@ -81,6 +82,14 @@ public class ChatValidator {
     public void validateParticipant(Long chatId, Long userId) {
         if (!chatParticipantRepository.existsByChatIdAndUserId(chatId, userId)) {
             throw new FFForbiddenException("User " + userId + " does not have access to chat " + chatId);
+        }
+    }
+
+    public void validateCreateMessageDto(CreateMessageDto dto) {
+        boolean emptyContent = dto.getContent() == null || dto.getContent().isBlank();
+        boolean noAttachment = dto.getAttachmentUrl() == null || dto.getAttachmentUrl().isBlank();
+        if (emptyContent && noAttachment) {
+            throw new IllegalArgumentException("The message cannot be empty.");
         }
     }
 

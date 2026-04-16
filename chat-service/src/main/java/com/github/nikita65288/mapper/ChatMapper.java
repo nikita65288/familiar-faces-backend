@@ -13,6 +13,11 @@ import java.util.List;
 @Mapper(config = BaseMapperConfig.class, imports = {ChatType.class})
 public interface ChatMapper {
 
+    @Mapping(target = "participantIds", ignore = true)
+    @Mapping(target = "otherParticipantId", ignore = true)
+    @Mapping(target = "lastMessage", ignore = true)
+    @Mapping(target = "lastMessageAt", ignore = true)
+    @Mapping(target = "lastMessageSenderId", ignore = true)
     ChatDto chatToChatDto(Chat chat);
 
     List<ChatDto> chatsToChatDtoList(List<Chat> chats);

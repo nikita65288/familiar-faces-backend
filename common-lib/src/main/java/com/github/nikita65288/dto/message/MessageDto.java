@@ -12,6 +12,7 @@ public class MessageDto {
     private Long chatId;
     private Long senderId;
     private String content;
+    private String attachmentUrl;
     private boolean isRead;
     private LocalDateTime createdAt;
 }

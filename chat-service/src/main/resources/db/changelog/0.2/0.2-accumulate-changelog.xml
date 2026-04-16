@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="add-chat-avatar-url" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'add-chat-avatar-url'</sqlCheck>
+        </preConditions>
+        <comment>Adds 'avatar_url' column to 'chats' table.</comment>
+        <sqlFile path="add-chat-avatar-url.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="add-message-attachment" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'add-message-attachment'</sqlCheck>
+        </preConditions>
+        <comment>Adds 'attachment_url' column to 'messages' table.</comment>
+        <sqlFile path="add-message-attachment.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>

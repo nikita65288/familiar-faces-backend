@@ -5,6 +5,9 @@ import com.github.nikita65288.dto.chat.CreateChatDto;
 import com.github.nikita65288.dto.message.CreateMessageDto;
 import com.github.nikita65288.dto.message.MessageDto;
 import com.github.nikita65288.service.ChatService;
+import com.github.nikita65288.dto.chat.UpdateChatAvatarDto;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -76,6 +80,23 @@ public class ChatController {
     ) {
         chatService.markMessagesAsReadAndNotify(chatId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{chatId}/avatar")
+    public ResponseEntity<ChatDto> updateChatAvatar(
+            @PathVariable Long chatId,
+            @RequestHeader(USER_ID_HEADER) Long userId,
+            @RequestBody UpdateChatAvatarDto dto
+    ) {
+        return ResponseEntity.ok(chatService.updateAvatar(chatId, userId, dto.getAvatarUrl()));
+    }
+
+    @DeleteMapping("/{chatId}/participants/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveChat(@RequestHeader("X-User-Id") Long userId,
+                          @PathVariable Long chatId
+    ) {
+        chatService.leaveChat(chatId, userId);
     }
 
     @DeleteMapping("/{chatId}/messages/{messageId}")

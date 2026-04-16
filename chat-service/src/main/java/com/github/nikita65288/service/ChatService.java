@@ -11,6 +11,8 @@ import com.github.nikita65288.entity.ChatParticipant;
 import com.github.nikita65288.entity.Message;
 import com.github.nikita65288.enums.ChatType;
 import com.github.nikita65288.enums.ParticipantRole;
+import com.github.nikita65288.exception.FFBadRequestException;
+import com.github.nikita65288.exception.FFNotFoundException;
 import com.github.nikita65288.mapper.ChatMapper;
 import com.github.nikita65288.mapper.MessageMapper;
 import com.github.nikita65288.repository.ChatParticipantRepository;
@@ -32,6 +34,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,7 +90,12 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ChatDto> getUserChats(Long userId) {
         List<Chat> chats = chatRepository.findAllByUserId(userId);
-        return chatMapper.chatsToChatDtoList(chats);
+        return chats.stream()
+                .map(c -> enrichChatDto(c, userId))
+                .sorted(Comparator.comparing(
+                        ChatDto::getLastMessageAt,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
     }
 
     @Transactional
@@ -137,7 +145,7 @@ public class ChatService {
 
                 // Send message from createChatDto to existent chat
                 sendFirstMessageIfExists(chat.getId(), creatorId, createChatDto.getFirstMessage());
-                return chatMapper.chatToChatDto(chat);
+                return enrichChatDto(chat, creatorId);
             }
         }
 
@@ -155,17 +163,19 @@ public class ChatService {
         // If there is the first message, then create and send it
         sendFirstMessageIfExists(chat.getId(), creatorId, createChatDto.getFirstMessage());
 
-        return chatMapper.chatToChatDto(chat);
+        return enrichChatDto(chat, creatorId);
     }
 
     @Transactional
-    public MessageDto saveMessage(Long chatId, Long senderId, CreateMessageDto createMessageDto) {
+    public MessageDto saveMessage(Long chatId, Long senderId, CreateMessageDto dto) {
 
         chatValidator.validateParticipant(chatId, senderId);
+        chatValidator.validateCreateMessageDto(dto);
 
         markMessagesAsReadAndNotify(chatId, senderId);
 
-        Message message = messageMapper.createMessageDtoToMessage(chatId, senderId, createMessageDto);
+        Message message = messageMapper.createMessageDtoToMessage(chatId, senderId, dto);
+        message.setAttachmentUrl(dto.getAttachmentUrl());
         message = messageRepository.save(message);
 
         MessageDto messageDto = messageMapper.messageToMessageDto(message);
@@ -220,6 +230,33 @@ public class ChatService {
     }
 
     @Transactional
+    public ChatDto updateAvatar(Long chatId, Long userId, String avatarUrl) {
+        chatValidator.validateParticipant(chatId, userId);
+
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new FFNotFoundException("Чат не найден"));
+
+        if (chat.getType() != ChatType.GROUP) {
+            throw new FFBadRequestException("Аватар можно задать только групповому чату");
+        }
+        chat.setAvatarUrl(avatarUrl);
+        return enrichChatDto(chatRepository.save(chat), userId);
+    }
+
+    @Transactional
+    public void leaveChat(Long chatId, Long userId) {
+        chatValidator.validateParticipant(chatId, userId);
+
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new FFNotFoundException("Чат не найден"));
+
+        if (chat.getType() != ChatType.GROUP) {
+            throw new IllegalStateException("Покинуть можно только групповой чат");
+        }
+        chatParticipantRepository.deleteByChatIdAndUserId(chatId, userId);
+    }
+
+    @Transactional
     public void deleteMessage(Long chatId, Long messageId, Long userId) {
 
         // Validate
@@ -252,6 +289,40 @@ public class ChatService {
 
             saveMessage(chatId, senderId, msgDto);
         }
+    }
+
+    private ChatDto enrichChatDto(Chat chat, Long currentUserId) {
+        ChatDto dto = chatMapper.chatToChatDto(chat);
+
+        List<Long> participantIds = chatParticipantRepository
+                .findAllByChatId(chat.getId())
+                .stream().map(ChatParticipant::getUserId).toList();
+        dto.setParticipantIds(participantIds);
+
+        if (chat.getType() == ChatType.PRIVATE) {
+            dto.setOtherParticipantId(
+                    participantIds.stream()
+                            .filter(id -> !id.equals(currentUserId))
+                            .findFirst().orElse(null));
+        }
+
+        messageRepository.findFirstByChatIdOrderByCreatedAtDesc(chat.getId())
+                .ifPresent(m -> {
+                    dto.setLastMessage(buildPreview(m));
+                    dto.setLastMessageAt(m.getCreatedAt());
+                    dto.setLastMessageSenderId(m.getSenderId());
+                });
+
+        return dto;
+    }
+
+    private String buildPreview(Message m) {
+        if (m.getContent() != null && !m.getContent().isBlank()) {
+            String c = m.getContent();
+            return c.length() > 80 ? c.substring(0, 80) + "…" : c;
+        }
+        if (m.getAttachmentUrl() != null) return "\uD83D\uDCCE Вложение";
+        return "";
     }
     //endregion private methods
 }

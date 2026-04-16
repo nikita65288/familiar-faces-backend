@@ -25,4 +25,7 @@ public class Chat extends BaseEntity {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 }

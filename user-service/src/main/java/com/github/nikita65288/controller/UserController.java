@@ -37,6 +37,13 @@ public class UserController {
         userProfileService.createInitialProfile(userDto);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileDto> getMyProfile(
+            @RequestHeader("X-User-Id") Long authId
+    ) {
+        return ResponseEntity.ok(userProfileService.getProfileByAuthId(authId));
+    }
+
     @GetMapping("/{authId}")
     public ResponseEntity<UserProfileDto> getUser(@PathVariable Long authId) {
         return ResponseEntity.ok(userProfileService.getProfileByAuthId(authId));
