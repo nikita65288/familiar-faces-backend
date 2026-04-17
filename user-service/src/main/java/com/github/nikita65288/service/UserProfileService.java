@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -32,12 +33,26 @@ public class UserProfileService {
         this.userMapper = userMapper;
     }
 
-    @Cacheable(value = "userProfiles", key = "#authId")
+    @Caching(
+            cacheable = { @Cacheable(value = "userProfiles", key = "'id:' + #authId") },
+            put = { @CachePut(value = "userProfiles", key = "'user:' + #result.username", unless = "#result == null") }
+    )
     @Transactional(readOnly = true)
     public UserProfileDto getProfileByAuthId(Long authId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
                 .orElseThrow(() -> new FFNotFoundException("Profile not found"));
 
+        return userMapper.userProfileToUserProfileDto(profile);
+    }
+
+    @Caching(
+            cacheable = { @Cacheable(value = "userProfiles", key = "'user:' + #username") },
+            put = { @CachePut(value = "userProfiles", key = "'id:' + #result.authId", unless = "#result == null") }
+    )
+    @Transactional(readOnly = true)
+    public UserProfileDto searchByUsername(String username) {
+        UserProfile profile = userProfileRepository.findByUsername(username)
+                .orElseThrow(() -> new FFNotFoundException("Profile not found"));
         return userMapper.userProfileToUserProfileDto(profile);
     }
 
@@ -47,7 +62,10 @@ public class UserProfileService {
         userProfileRepository.save(profile);
     }
 
-    @CachePut(value = "userProfiles", key = "#authId")
+    @Caching(put = {
+            @CachePut(value = "userProfiles", key = "'id:' + #authId"),
+            @CachePut(value = "userProfiles", key = "'user:' + #result.username")
+    })
     @Transactional
     public UserProfileDto updateProfile(Long authId, UpdateUserProfileDto dto) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
@@ -59,7 +77,10 @@ public class UserProfileService {
         return userMapper.userProfileToUserProfileDto(profile);
     }
 
-    @CachePut(value = "userProfiles", key = "#authId")
+    @Caching(put = {
+            @CachePut(value = "userProfiles", key = "'id:' + #authId"),
+            @CachePut(value = "userProfiles", key = "'user:' + #result.username")
+    })
     @Transactional
     public UserProfileDto updateAvatar(Long authId, String avatarUrl) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
@@ -83,9 +104,17 @@ public class UserProfileService {
         return foundCount == uniqueIds.size();
     }
 
-    @CacheEvict(value = "userProfiles", key = "#authId")
+    @Caching(evict = {
+            @CacheEvict(value = "userProfiles", key = "'id:' + #authId"),
+            @CacheEvict(value = "userProfiles", key = "'user:' + #result.username")
+    })
     @Transactional
-    public void deleteUser(Long authId) {
+    public UserProfileDto deleteUser(Long authId) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId)
+                .orElseThrow(() -> new FFNotFoundException("Profile not found"));
+
         userProfileRepository.deleteByAuthId(authId);
+
+        return userMapper.userProfileToUserProfileDto(profile);
     }
 }

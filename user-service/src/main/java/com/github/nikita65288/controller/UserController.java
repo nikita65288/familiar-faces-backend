@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -70,5 +71,10 @@ public class UserController {
     @PostMapping("/validate")
     public boolean validateUsers(@RequestBody List<Long> authIds) {
         return userProfileService.validateUsersExist(authIds);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<UserProfileDto> searchByUsername(@RequestParam String username) {
+        return ResponseEntity.ok(userProfileService.searchByUsername(username));
     }
 }

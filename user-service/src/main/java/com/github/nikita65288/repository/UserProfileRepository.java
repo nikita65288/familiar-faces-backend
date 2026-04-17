@@ -15,6 +15,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     Optional<UserProfile> findByAuthId(Long authId);
 
+    Optional<UserProfile> findByUsername(String username);
+
     @Query("select count(u) from UserProfile u where u.authId in ?1")
     long countByAuthIdIn(List<Long> authIds);
 

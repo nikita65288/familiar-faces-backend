@@ -24,4 +24,14 @@
         <sqlFile path="add-message-attachment.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="add-message-reactions" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'add-message-reactions'</sqlCheck>
+        </preConditions>
+        <comment>Adds 'message_reactions' table.</comment>
+        <sqlFile path="add-message-reactions.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

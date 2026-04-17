@@ -2,6 +2,7 @@ package com.github.nikita65288.controller;
 
 import com.github.nikita65288.dto.chat.ChatDto;
 import com.github.nikita65288.dto.chat.CreateChatDto;
+import com.github.nikita65288.dto.message.AddReactionDto;
 import com.github.nikita65288.dto.message.CreateMessageDto;
 import com.github.nikita65288.dto.message.MessageDto;
 import com.github.nikita65288.service.ChatService;
@@ -107,5 +108,16 @@ public class ChatController {
     ) {
         chatService.deleteMessage(chatId, messageId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{chatId}/messages/{messageId}/reactions")
+    public ResponseEntity<Void> toggleReaction(
+            @PathVariable Long chatId,
+            @PathVariable Long messageId,
+            @RequestHeader(USER_ID_HEADER) Long userId,
+            @RequestBody AddReactionDto dto
+    ) {
+        chatService.toggleReaction(chatId, userId, messageId, dto.getEmoji());
+        return ResponseEntity.ok().build();
     }
 }

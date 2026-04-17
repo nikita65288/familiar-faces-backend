@@ -9,6 +9,7 @@ import com.github.nikita65288.dto.message.MessageDto;
 import com.github.nikita65288.entity.Chat;
 import com.github.nikita65288.entity.ChatParticipant;
 import com.github.nikita65288.entity.Message;
+import com.github.nikita65288.entity.MessageReaction;
 import com.github.nikita65288.enums.ChatType;
 import com.github.nikita65288.enums.ParticipantRole;
 import com.github.nikita65288.exception.FFBadRequestException;
@@ -17,6 +18,7 @@ import com.github.nikita65288.mapper.ChatMapper;
 import com.github.nikita65288.mapper.MessageMapper;
 import com.github.nikita65288.repository.ChatParticipantRepository;
 import com.github.nikita65288.repository.ChatRepository;
+import com.github.nikita65288.repository.MessageReactionRepository;
 import com.github.nikita65288.repository.MessageRepository;
 import com.github.nikita65288.validator.ChatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatService {
@@ -50,6 +53,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final MessageRepository messageRepository;
+    private final MessageReactionRepository messageReactionRepository;
 
     // Mappers
     private final ChatMapper chatMapper;
@@ -67,6 +71,7 @@ public class ChatService {
             ChatRepository chatRepository,
             ChatParticipantRepository chatParticipantRepository,
             MessageRepository messageRepository,
+            MessageReactionRepository messageReactionRepository,
             // Mappers
             ChatMapper chatMapper,
             MessageMapper messageMapper,
@@ -80,6 +85,7 @@ public class ChatService {
         this.chatRepository = chatRepository;
         this.chatParticipantRepository = chatParticipantRepository;
         this.messageRepository = messageRepository;
+        this.messageReactionRepository = messageReactionRepository;
         // Mappers
         this.chatMapper = chatMapper;
         this.messageMapper = messageMapper;
@@ -111,9 +117,7 @@ public class ChatService {
                 size,
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-
         Page<Message> messagePage = messageRepository.findByChatId(chatId, pageable);
-
         List<MessageDto> content = new ArrayList<>(
                 messagePage.getContent().stream()
                         .map(messageMapper::messageToMessageDto)
@@ -121,6 +125,11 @@ public class ChatService {
         );
 
         Collections.reverse(content);
+        List<Long> msgIds = content.stream()
+                .map(MessageDto::getId)
+                .toList();
+        Map<Long, Map<String, List<Long>>> reactionsMap = getReactionsMapForMessages(msgIds);
+        content.forEach(dto -> dto.setReactions(reactionsMap.getOrDefault(dto.getId(), Map.of())));
 
         return new PageImpl<>(content, pageable, messagePage.getTotalElements());
     }
@@ -272,6 +281,32 @@ public class ChatService {
         );
     }
 
+    @Transactional
+    public void toggleReaction(Long chatId, Long userId, Long messageId, String emoji) {
+        chatValidator.validateParticipant(chatId, userId);
+
+        Optional<MessageReaction> existing =
+                messageReactionRepository.findByMessageIdAndUserIdAndEmoji(messageId, userId, emoji);
+
+        if (existing.isPresent()) {
+            messageReactionRepository.delete(existing.get());
+        } else {
+            messageReactionRepository.save(
+                    MessageReaction.builder()
+                            .messageId(messageId)
+                            .userId(userId)
+                            .emoji(emoji)
+                            .build()
+            );
+        }
+
+        Map<String, List<Long>> reactions = getReactionsMap(messageId);
+        messagingTemplate.convertAndSend(
+                "/topic/chats." + chatId + ".reactions",
+                Map.of("messageId", messageId, "reactions", reactions)
+        );
+    }
+
     //region private methods
     private void addParticipant(Long chatId, Long userId, ParticipantRole role) {
         ChatParticipant participant = new ChatParticipant();
@@ -323,6 +358,31 @@ public class ChatService {
         }
         if (m.getAttachmentUrl() != null) return "\uD83D\uDCCE Вложение";
         return "";
+    }
+
+    private Map<String, List<Long>> getReactionsMap(Long messageId) {
+        return messageReactionRepository.findByMessageId(messageId)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MessageReaction::getEmoji,
+                        Collectors.mapping(MessageReaction::getUserId, Collectors.toList())
+                ));
+    }
+
+    private Map<Long, Map<String, List<Long>>> getReactionsMapForMessages(List<Long> messageIds) {
+        if (messageIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return messageReactionRepository.findByMessageIdIn(messageIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MessageReaction::getMessageId,
+                        Collectors.groupingBy(
+                                MessageReaction::getEmoji,
+                                Collectors.mapping(MessageReaction::getUserId, Collectors.toList())
+                        )
+                ));
     }
     //endregion private methods
 }
