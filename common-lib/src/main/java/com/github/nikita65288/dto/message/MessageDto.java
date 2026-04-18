@@ -18,4 +18,5 @@ public class MessageDto {
     private boolean isRead;
     private LocalDateTime createdAt;
     private Map<String, List<Long>> reactions;
+    private Long replyToMessageId;
 }

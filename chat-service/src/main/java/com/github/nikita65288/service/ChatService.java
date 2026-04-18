@@ -176,6 +176,20 @@ public class ChatService {
     }
 
     @Transactional
+    public ChatDto getOrCreateSelfChat(Long userId) {
+        Optional<Chat> existing = chatRepository.findSelfChatByUserId(userId);
+        if (existing.isPresent()) {
+            return enrichChatDto(existing.get(), userId);
+        }
+        Chat chat = new Chat();
+        chat.setType(ChatType.PRIVATE);
+        chat = chatRepository.save(chat);
+        addParticipant(chat.getId(), userId, ParticipantRole.ADMIN);
+        return enrichChatDto(chat, userId);
+    }
+
+
+    @Transactional
     public MessageDto saveMessage(Long chatId, Long senderId, CreateMessageDto dto) {
 
         chatValidator.validateParticipant(chatId, senderId);
@@ -184,7 +198,6 @@ public class ChatService {
         markMessagesAsReadAndNotify(chatId, senderId);
 
         Message message = messageMapper.createMessageDtoToMessage(chatId, senderId, dto);
-        message.setAttachmentUrl(dto.getAttachmentUrl());
         message = messageRepository.save(message);
 
         MessageDto messageDto = messageMapper.messageToMessageDto(message);
@@ -264,6 +277,27 @@ public class ChatService {
         }
         chatParticipantRepository.deleteByChatIdAndUserId(chatId, userId);
     }
+
+    @Transactional
+    public void addParticipantToChat(Long chatId, Long requesterId, Long newUserId) {
+        chatValidator.validateParticipant(chatId, requesterId);
+
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new FFNotFoundException("Чат не найден"));
+
+        if (chat.getType() != ChatType.GROUP) {
+            throw new FFBadRequestException("Добавить участника можно только в групповой чат");
+        }
+
+        boolean alreadyIn = chatParticipantRepository.findAllByChatId(chatId)
+                .stream().anyMatch(p -> p.getUserId().equals(newUserId));
+        if (alreadyIn) {
+            throw new FFBadRequestException("Пользователь уже является участником чата");
+        }
+
+        addParticipant(chatId, newUserId, ParticipantRole.MEMBER);
+    }
+
 
     @Transactional
     public void deleteMessage(Long chatId, Long messageId, Long userId) {

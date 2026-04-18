@@ -1,5 +1,6 @@
 package com.github.nikita65288.controller;
 
+import com.github.nikita65288.dto.chat.AddParticipantDto;
 import com.github.nikita65288.dto.chat.ChatDto;
 import com.github.nikita65288.dto.chat.CreateChatDto;
 import com.github.nikita65288.dto.message.AddReactionDto;
@@ -46,14 +47,6 @@ public class ChatController {
         return ResponseEntity.ok(chatService.getUserChats(userId));
     }
 
-    @PostMapping
-    public ResponseEntity<ChatDto> createChat(
-            @RequestHeader(USER_ID_HEADER) Long userId,
-            @RequestBody CreateChatDto createChatDto
-    ) {
-        return ResponseEntity.ok(chatService.startConversation(userId, createChatDto));
-    }
-
     @GetMapping("/{chatId}/messages")
     public ResponseEntity<Page<MessageDto>> getChatHistory(
             @PathVariable Long chatId,
@@ -63,6 +56,21 @@ public class ChatController {
     ) {
         Page<MessageDto> history = chatService.getChatHistory(chatId, currentUserId, page, size);
         return ResponseEntity.ok(history);
+    }
+
+    @PostMapping
+    public ResponseEntity<ChatDto> createChat(
+            @RequestHeader(USER_ID_HEADER) Long userId,
+            @RequestBody CreateChatDto createChatDto
+    ) {
+        return ResponseEntity.ok(chatService.startConversation(userId, createChatDto));
+    }
+
+    @PostMapping("/self")
+    public ResponseEntity<ChatDto> getOrCreateSelfChat(
+            @RequestHeader(USER_ID_HEADER) Long userId
+    ) {
+        return ResponseEntity.ok(chatService.getOrCreateSelfChat(userId));
     }
 
     @PostMapping("/{chatId}/messages")
@@ -118,6 +126,16 @@ public class ChatController {
             @RequestBody AddReactionDto dto
     ) {
         chatService.toggleReaction(chatId, userId, messageId, dto.getEmoji());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{chatId}/participants")
+    public ResponseEntity<Void> addParticipant(
+            @PathVariable Long chatId,
+            @RequestHeader(USER_ID_HEADER) Long requesterId,
+            @RequestBody AddParticipantDto dto
+    ) {
+        chatService.addParticipantToChat(chatId, requesterId, dto.getUserId());
         return ResponseEntity.ok().build();
     }
 }

@@ -33,5 +33,8 @@ public class Message extends BaseEntity {
 
     @Column(name = "attachment_url")
     private String attachmentUrl;
+
+    @Column(name = "reply_to_message_id")
+    private Long replyToMessageId;
 }
 

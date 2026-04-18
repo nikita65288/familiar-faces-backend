@@ -10,4 +10,6 @@ public class CreateMessageDto {
     private String content;
 
     private String attachmentUrl;
+
+    private Long replyToMessageId;
 }

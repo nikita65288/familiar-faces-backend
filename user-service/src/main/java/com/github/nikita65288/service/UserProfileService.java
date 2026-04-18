@@ -56,6 +56,13 @@ public class UserProfileService {
         return userMapper.userProfileToUserProfileDto(profile);
     }
 
+    public List<UserProfileDto> searchByPrefix(String prefix) {
+        return userProfileRepository.findTop10ByUsernameContainingIgnoreCase(prefix)
+                .stream()
+                .map(userMapper::userProfileToUserProfileDto)
+                .toList();
+    }
+
     @Transactional
     public void createInitialProfile(UserDto dto) {
         UserProfile profile = userMapper.userDtoToUserProfile(dto);

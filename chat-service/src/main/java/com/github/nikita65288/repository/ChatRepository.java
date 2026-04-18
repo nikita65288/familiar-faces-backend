@@ -27,4 +27,16 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             Long userId2,
             ChatType type
     );
+
+    @Query(value = """
+    SELECT c.* FROM chats c
+    WHERE c.type_id = 1
+    AND EXISTS (
+        SELECT 1 FROM chat_participants cp
+        WHERE cp.chat_id = c.id AND cp.user_id = :userId
+    )
+    AND (SELECT COUNT(*) FROM chat_participants cp2 WHERE cp2.chat_id = c.id) = 1
+    """, nativeQuery = true)
+    Optional<Chat> findSelfChatByUserId(@Param("userId") Long userId);
+
 }

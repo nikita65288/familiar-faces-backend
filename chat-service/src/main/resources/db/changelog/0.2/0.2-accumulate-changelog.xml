@@ -34,4 +34,14 @@
         <sqlFile path="add-message-reactions.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="add-reply-to-message" author="Nikita Tribunskii">
+        <preConditions onFail="CONTINUE">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM DATABASECHANGELOG
+                                         WHERE ID = 'add-reply-to-message'</sqlCheck>
+        </preConditions>
+        <comment>Adds 'reply_to_message_id' column to 'messages' table.</comment>
+        <sqlFile path="add-reply-to-message.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
 </databaseChangeLog>

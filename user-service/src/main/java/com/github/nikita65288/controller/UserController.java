@@ -77,4 +77,10 @@ public class UserController {
     public ResponseEntity<UserProfileDto> searchByUsername(@RequestParam String username) {
         return ResponseEntity.ok(userProfileService.searchByUsername(username));
     }
+
+    @GetMapping("/search/suggest")
+    public ResponseEntity<List<UserProfileDto>> suggestByUsername(@RequestParam String prefix) {
+        if (prefix == null || prefix.length() < 3) return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(userProfileService.searchByPrefix(prefix));
+    }
 }
