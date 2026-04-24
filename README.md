@@ -4,16 +4,18 @@ Familiar Faces — это мессенджер, построенный с исп
 Архитектура:
 
 familiar-faces-backend/
-├── auth-service              # Сервис аутентификации и авторизации
-├── user-service              # Управление профилями пользователей
-├── chat-service              # Функционал чатов и сообщений
-├── media-service             # Работа с медиа-файлами (фото)
-├── notification-service      # Система уведомлений в real-time
-├── api-gateway               # API Gateway (маршрутизация)
-├── config-service            # Централизованная конфигурация
-├── discovery-service         # Service Discovery (Eureka)
-├── common-lib                # Общие классы и утилиты
-└── pom.xml                   # Главный файл конфигурации Maven
+
+- auth-service              # Сервис аутентификации и авторизации
+- user-service              # Управление профилями пользователей
+- chat-service              # Функционал чатов и сообщений
+- media-service             # Работа с медиа-файлами (фото)
+- notification-service      # Система уведомлений в real-time
+- api-gateway               # API Gateway (маршрутизация)
+- config-service            # Централизованная конфигурация
+- discovery-service         # Service Discovery (Eureka)
+- common-lib                # Общие классы и утилиты
+- pom.xml                   # Главный файл конфигурации Maven
+
 
 Технологический стек:
 
