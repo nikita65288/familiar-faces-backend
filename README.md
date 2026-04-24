@@ -19,39 +19,39 @@ familiar-faces-backend/
 
 Языки и фреймворки:
 
-Java 17 — язык программирования
-Spring Boot 3.2.5 — основной фреймворк приложения
-Spring Cloud 2023.0.0 — микросервисная архитектура
-Spring Cloud Eureka — Service Discovery
-Spring Cloud Config — управление конфигурацией
-Spring Cloud Gateway — API Gateway
+- Java 17 — язык программирования
+- Spring Boot 3.2.5 — основной фреймворк приложения
+- Spring Cloud 2023.0.0 — микросервисная архитектура
+- Spring Cloud Eureka — Service Discovery
+- Spring Cloud Config — управление конфигурацией
+- Spring Cloud Gateway — API Gateway
 
 Базы данных
 
-PostgreSQL 15 — реляционная БД (пользователи, диалоги, сообщения)
-MongoDB 6.0 — NoSQL БД (медиа-файлы и метаданные)
-Redis 7 — кэш
+- PostgreSQL 15 — реляционная БД (пользователи, диалоги, сообщения)
+- MongoDB 6.0 — NoSQL БД (медиа-файлы и метаданные)
+- Redis 7 — кэш
 
 Message Broker:
 
-Apache Kafka 3.7.0 (KRaft) — асинхронная обработка сообщений и событий
+- Apache Kafka 3.7.0 (KRaft) — асинхронная обработка сообщений и событий
 
 Логирование и мониторинг:
 
-Elasticsearch 8.9.1 — индексация и хранение логов
-Logstash 8.9.1 — обработка и парсинг логов
-Kibana 8.9.1 — визуализация и анализ логов
-Micrometer — сбор метрик приложения
+- Elasticsearch 8.9.1 — индексация и хранение логов
+- Logstash 8.9.1 — обработка и парсинг логов
+- Kibana 8.9.1 — визуализация и анализ логов
+- Micrometer — сбор метрик приложения
 
 Утилиты и библиотеки:
 
-Lombok 1.18.38 — избавление от boilerplate кода
-MapStruct 1.6.3 — маппинг между DTO и Entity
-JUnit 5 — тесты
+- Lombok 1.18.38 — избавление от boilerplate кода
+- MapStruct 1.6.3 — маппинг между DTO и Entity
+- JUnit 5 — тесты
 
 Инфраструктура и DevOps:
 
-Docker & Docker Compose — контейнеризация приложения
-Nginx — reverse proxy и балансировщик нагрузки
-Jenkins — CI/CD автоматизация сборки и развёртывания
-Maven — управление зависимостями и сборка проекта
+- Docker & Docker Compose — контейнеризация приложения
+- Nginx — reverse proxy и балансировщик нагрузки
+- Jenkins — CI/CD автоматизация сборки и развёртывания
+- Maven — управление зависимостями и сборка проекта
